@@ -2,7 +2,7 @@ import os
 import shlex
 import sys
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, Response
 
 from mlflow.server import handlers
 from mlflow.server.handlers import get_artifact_handler, STATIC_PREFIX_ENV_VAR, _add_static_prefix
@@ -53,8 +53,21 @@ def serve_static_file(path):
 # Serve the index.html for the React App for all other routes.
 @app.route(_add_static_prefix('/'))
 def serve():
-    return send_from_directory(STATIC_DIR, 'index.html')
-
+    # if index.html is present. What should be the condition here?
+    if os.path.exists(os.path.join(STATIC_DIR, "index.html")):
+        return send_from_directory(STATIC_DIR, 'index.html')
+    # text should be the name of the text file I created?
+    text = 'Unable to display MLflow UI - landing page (index.html) not found. \n' \
+           'You are very likely running the MLflow server using a source installation of the Python MLflow package.\n' \
+           'If you are a developer attempting to make MLflow source code changes and intentionally running a source ' \
+           'installation of MLflow,' \
+           'First install the node modules: \n' \
+           'https://github.com/mlflow/mlflow/blob/master/CONTRIBUTING.rst#install-node-modules\n' \
+           'And then run the Javascript dev server to view the UI: \n' \
+           'https://github.com/mlflow/mlflow/blob/master/CONTRIBUTING.rst#running-the-javascript-dev-server \n' \
+           'Otherwise, uninstall MLflow via [pip uninstall mlflow] and reinstall an official MLflow ' \
+           'release from PyPI via [pip install mlflow], and rerun the MLflow server. \n'
+    return Response(text, mimetype='text/plain')
 
 def _build_waitress_command(waitress_opts, host, port):
     opts = shlex.split(waitress_opts) if waitress_opts else []
