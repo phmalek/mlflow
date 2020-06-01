@@ -99,7 +99,7 @@ class Model(object):
 
     @classmethod
     def from_dict(cls, model_dict):
-        """Load a model from its YAML representation."""
+        """Load a model from dictionary."""
         if "signature" in model_dict and isinstance(model_dict["signature"], dict):
             model_dict = model_dict.copy()
             model_dict["signature"] = ModelSignature.from_dict(model_dict["signature"])
